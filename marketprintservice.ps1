@@ -1,7 +1,8 @@
 $PcName = Read-Host "PC Name"
 $MServ = gsv -ComputerName $PcName -Name marketprintservice
 
-Try{    
+Try
+{    
 	if($MServ | where {$_.Status -eq "stopped"}) 
     {    
         $MServ | Start-Service
@@ -9,5 +10,10 @@ Try{   
     }    
     else
     {   
-        Write-Warning "No Change - Service Already Running"}}Catch{    Write-Warning "Either the PC name is wrong or MarketPrintService could not be started"    
+        Write-Warning "No Change - Service Already Running"
     }
+}
+Catch
+{    
+    Write-Warning "Either the PC name is wrong or MarketPrintService could not be started"    
+}
