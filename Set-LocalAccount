@@ -1,0 +1,38 @@
+function Set-WorkstationLocalAdmin
+{
+    [CmdletBinding()]
+    Param
+    (
+        # Param1 help description
+        [Parameter(Mandatory=$true,
+                   ValueFromPipelineByPropertyName=$true,
+                   Position=0)]
+        $Computername,
+        [Parameter(Mandatory=$true)]
+        $Username,
+        [Parameter(Mandatory=$true)]
+        $Password,
+        $Description,
+        [switch]$New,
+        [switch]$PasswordReset
+    )
+
+    Begin
+    {}
+    Process
+    {
+        foreach ($computer in $Computername)
+        {
+            if($PSBoundParameters['New']){
+                Invoke-Command -ComputerName $Computer -ScriptBlock {net user $args[0] $args[1] /add} -ArgumentList $Username,$Password
+                Invoke-Command -ComputerName $Computer -ScriptBlock {net localgroup administrators $args[0] /add} -ArgumentList $Username
+                Invoke-Command -ComputerName $Computer -ScriptBlock {net user $args[0] /comment:"$($args[1])"} -ArgumentList $Username,$Description
+            }
+            elseif ($PSBoundParameters['PasswordReset']){
+                Invoke-Command -ComputerName $Computer -ScriptBlock {net user $args[0] $args[1]} -ArgumentList $Username,$Password
+            }
+        }
+    }
+    End
+    {}
+}
