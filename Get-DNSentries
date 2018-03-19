@@ -1,0 +1,46 @@
+$a = 100 .. 254
+$b = '10.0.10.'
+$Online = @()
+$dns = @()
+$Entries = @()
+
+foreach ($ip in $a)
+{
+    $d = $b + $ip
+    if (Test-Connection $d -Count 1 -Quiet)
+    {
+
+        if (Resolve-DnsName $d | select -expand namehost)
+        {
+            $name = Resolve-DnsName $d | select -expand namehost
+    
+            $ipname = $name.split('.')[0]
+
+            $DNSName = [PSCustomObject]@{
+
+                DNS = $ipname
+                IP = $d
+
+            }
+
+        $Entries += $DNSName
+
+        }
+        else
+        {
+            $name = Resolve-DnsName $d | select -expand namehost
+    
+            $ipname = $name.split('.')[0]
+
+            $DNSName = [PSCustomObject]@{
+
+                DNS = "Unknown"
+                IP = $d
+
+            }
+
+        $Entries += $DNSName
+            
+        }
+    }
+}
