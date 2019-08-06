@@ -1,0 +1,21 @@
+#get Computers with secure boot enabled
+#get computers that are running
+#get generation 2
+
+#Enter Hyper-v Hosts
+$hosts = $null
+$vm = get-vm -ComputerName $hosts | where {$_.state -eq 'Running'} | where {$_.generation -eq 2} | select vmname,computername
+foreach($v in $vm){
+    if(Get-VMFirmware -ComputerName $v.ComputerName -VMName $v.VMName | where {$_.secureboot -eq 'on'}){
+        Checkpoint-VM -SnapshotName disablesecureboot -ComputerName $v.ComputerName -VMName $v.VMName -Confirm
+        sleep -Seconds 60
+        Stop-VM -ComputerName $v.ComputerName -Name $v.VMName -Force -confirm
+        while(Test-Connection -ComputerName $v.VMName -Count 1 -Quiet){
+                sleep -Seconds 10
+            }
+        Set-VMFirmware -ComputerName $v.ComputerName -VMName $v.VMName -EnableSecureBoot Off -confirm
+        sleep -Seconds 5
+        Start-VM -ComputerName $v.ComputerName -Name $v.VMName -Confirm
+        sleep -Seconds 90
+    }
+}
